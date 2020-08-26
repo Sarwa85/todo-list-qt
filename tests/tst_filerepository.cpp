@@ -55,7 +55,7 @@ private slots:
         QCOMPARE(tasks.count(), m_task_counter);
     }
 
-    void clean()
+    void cleanupTestCase()
     {
         QFile repo_file(m_repo->name());
         m_repo->deleteLater();
