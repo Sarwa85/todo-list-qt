@@ -34,6 +34,8 @@ private slots:
     void on_removeButton_clicked();
     void on_editButton_clicked();
 
+    void on_listView_doubleClicked(const QModelIndex &index);
+
 private:
     Ui::MainWidget *ui;
     QQueue<QUuid> m_queue;

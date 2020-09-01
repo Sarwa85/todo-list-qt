@@ -19,6 +19,8 @@ MainWidget::MainWidget(Controler& controler, QWidget *parent)
     ui->removeButton->setIcon(QIcon::fromTheme("list-remove"));
     ui->refreshButton->setIcon(QIcon::fromTheme("view-refresh"));
     ui->editButton->setIcon(QIcon::fromTheme("accessories-text-editor"));
+    ui->okButton->setIcon(QIcon::fromTheme("document-save"));
+    ui->backButton->setIcon(QIcon::fromTheme("window-close"));
 
     connect(ui->listView, &QListView::clicked, this, &MainWidget::updateUI);
     updateUI(QModelIndex());
@@ -105,6 +107,7 @@ void MainWidget::on_editButton_clicked()
 
 void MainWidget::updateActiveTaskUI()
 {
+    ui->editGroupBox->setTitle(m_activeTask.id > 0 ? tr("Edycja zadania") : tr("Nowe zadanie"));
     ui->titleLineEdit->setText(m_activeTask.title);
     ui->descTextEdit->setPlainText(m_activeTask.text);
     ui->dateEdit->setDate(m_activeTask.dateTime.date());
@@ -131,4 +134,10 @@ void MainWidget::readActiveTask()
         m_activeTask.dateTime = QDateTime(ui->dateEdit->date(), ui->timeEdit->time());
     else
         m_activeTask.dateTime = QDateTime();
+}
+
+void MainWidget::on_listView_doubleClicked(const QModelIndex &index)
+{
+    if (index.isValid())
+        on_editButton_clicked();
 }
