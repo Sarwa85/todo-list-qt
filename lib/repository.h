@@ -8,14 +8,18 @@
 class Repository : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
 public:
-    explicit Repository(const QString& name, QObject *parent = nullptr);
+    explicit Repository(QObject *parent = nullptr);
     QString name();
 
     virtual void add(Task task, QUuid uuid = QUuid()) = 0;
     virtual void readAll() = 0;
     virtual void remove(Task task) = 0;
     virtual void edit(Task task) = 0;
+
+public Q_SLOTS:
+    void setName(QString name);
 
 Q_SIGNALS:
     void saved(const Task& task, const QUuid& uuid);
@@ -25,6 +29,7 @@ Q_SIGNALS:
     void removeError(const QString& errorText);
     void editError(const QString& errotText, int id);
     void tasks(const QList<Task>& list);
+    void nameChanged(QString name);
 
 protected:
     QString m_name;

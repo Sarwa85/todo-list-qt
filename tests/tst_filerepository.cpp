@@ -25,7 +25,8 @@ private slots:
     }
 
     void init() {
-        m_repo = new FileRepository("test-repo", this);
+        m_repo = new FileRepository(this);
+        m_repo->setName("test-repo");
     }
 
     void addTest_data() {

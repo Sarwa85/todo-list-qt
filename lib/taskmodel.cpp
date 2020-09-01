@@ -8,7 +8,11 @@ Q_LOGGING_CATEGORY(modelTask, "model.task")
 TaskModel::TaskModel(QObject *parent)
     : QStandardItemModel(parent)
 {
-
+    m_roles.insert(RoleData, "roleData");
+    m_roles.insert(RoleState, "roleState");
+    m_roles.insert(RoleUuid, "roleUuid");
+    m_roles.insert(RoleTitle, "roleTitle");
+    m_roles.insert(RoleText, "roleText");
 }
 
 QModelIndex TaskModel::indexFormUuid(const QUuid &uuid)
@@ -35,9 +39,16 @@ QModelIndex TaskModel::indexFromId(int id)
     return QModelIndex();
 }
 
+QHash<int, QByteArray> TaskModel::roleNames() const
+{
+    return m_roles;
+}
+
 void TaskModel::append(Task task, TaskState state, QUuid uuid)
 {
     auto item = new QStandardItem(task.title);
+    item->setData(task.title, RoleTitle);
+    item->setData(task.text, RoleText);
     item->setData(QVariant::fromValue<Task>(task), RoleData);
     item->setData(QVariant::fromValue<TaskState>(state), RoleState);
     item->setData(QVariant::fromValue<QUuid>(uuid), RoleUuid);
@@ -63,6 +74,8 @@ void TaskModel::updateTask(const Task &task, const QUuid& uuid)
     auto index = indexFormUuid(uuid);
     if (!index.isValid())
         return;
+    setData(index, task.title, RoleTitle);
+    setData(index, task.text, RoleText);
     setData(index, QVariant::fromValue<Task>(task), RoleData);
     setData(index, QVariant::fromValue<TaskState>(TaskReady), RoleState);
     setData(index, QVariant::fromValue<QUuid>(QUuid()), RoleUuid);
@@ -76,9 +89,16 @@ void TaskModel::updateTask(const Task &task, TaskState state)
         return;
     }
 
+    setData(index, task.title, RoleTitle);
+    setData(index, task.text, RoleText);
     setData(index, QVariant::fromValue<Task>(task), RoleData);
     setData(index, QVariant::fromValue<QUuid>(QUuid()), RoleUuid);
     setData(index, QVariant::fromValue<TaskState>(state), RoleState);
+}
+
+QModelIndex TaskModel::indexFromRow(int row) const
+{
+    return index(row, 0);
 }
 
 

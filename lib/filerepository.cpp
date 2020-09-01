@@ -7,15 +7,15 @@
 Q_DECLARE_LOGGING_CATEGORY(repoFile)
 Q_LOGGING_CATEGORY(repoFile, "repository.file")
 
-FileRepository::FileRepository(const QString &name, QObject *parent)
-    : Repository(name, parent)
+FileRepository::FileRepository(QObject *parent)
+    : Repository(parent)
 {
 
 }
 
 void FileRepository::add(Task task, QUuid uuid)
 {
-    QThread::sleep(2);
+//    QThread::sleep(2);
     if (!isValid(task)) {
         Q_EMIT saveError("Niepoprawne zadanie", uuid);
         return;
@@ -63,7 +63,7 @@ QList<Task> FileRepository::readFromFile()
 
 void FileRepository::readAll()
 {
-    QThread::sleep(2);
+//    QThread::sleep(2);
     m_model = readFromFile();
     Q_EMIT tasks(m_model);
 }
@@ -71,7 +71,7 @@ void FileRepository::readAll()
 void FileRepository::remove(Task task)
 {
     qCDebug(repoFile) << "Usuwam" << task.id << task.title;
-    QThread::sleep(2);
+//    QThread::sleep(2);
     for (int a = m_model.count() - 1; a >= 0; --a) {
         if (m_model[a].id == task.id) {
             auto t = m_model.takeAt(a);
@@ -93,7 +93,7 @@ void FileRepository::remove(Task task)
 void FileRepository::edit(Task task)
 {
     qCDebug(repoFile) << "Edycja zadania" << task.id << task.title;
-    QThread::sleep(2);
+//    QThread::sleep(2);
     auto index = taskIndex(task, m_model);
     if (index < 0) {
         auto error_text = tr("Nie znaleziono zadania");

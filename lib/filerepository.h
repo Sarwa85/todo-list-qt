@@ -8,7 +8,7 @@ class FileRepository : public Repository
 {
     Q_OBJECT
 public:
-    FileRepository(const QString& name, QObject* parent = 0);
+    FileRepository(QObject* parent = 0);
 
     void add(Task task, QUuid uuid = QUuid()) override;
     void readAll() override;

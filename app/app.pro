@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui quick
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -55,3 +55,11 @@ DEPENDPATH += $$PWD/../lib
 #else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/debug/todolist.lib
 #else:unix: PRE_TARGETDEPS += $$OUT_PWD/../lib/libtodolist.a
 PRE_TARGETDEPS += $$OUT_PWD/../lib/libtodolist.a
+
+DISTFILES += \
+    qml/EditPage.qml \
+    qml/ListPage.qml \
+    qml/Style.qml \
+    qml/TaskDelegate.qml \
+    qml/main.qml \
+    qml/qmldir
