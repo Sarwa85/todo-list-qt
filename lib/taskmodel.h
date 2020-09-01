@@ -11,7 +11,7 @@ public:
         TaskReady,
         TaskWaitingRemove,
         TaskWaitingAdd,
-        TaskWaitingUpdate
+        TaskWaitingEdit
     };
 
     enum Roles {
@@ -29,6 +29,7 @@ public Q_SLOTS:
     void updateState(const QUuid& uuid, TaskModel::TaskState state);
     void updateState(Task task, TaskModel::TaskState state);
     void updateTask(const Task& task, const QUuid &uuid);
+    void updateTask(const Task& task, TaskState state);
 };
 
 Q_DECLARE_METATYPE(TaskModel::TaskState);

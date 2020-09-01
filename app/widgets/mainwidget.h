@@ -32,13 +32,16 @@ private slots:
     void on_backButton_clicked();
     void on_okButton_clicked();
     void on_removeButton_clicked();
+    void on_editButton_clicked();
 
 private:
     Ui::MainWidget *ui;
     QQueue<QUuid> m_queue;
     Controler& m_controler;
+    Task m_currentTask;
 
-    void setActive(bool active);
+    void updateCurrentTaskUI();
+    void updatePreviewTask();
 };
 
 

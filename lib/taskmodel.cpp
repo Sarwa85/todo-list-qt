@@ -1,6 +1,9 @@
 #include "taskmodel.h"
 
-#include <QDebug>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(modelTask)
+Q_LOGGING_CATEGORY(modelTask, "model.task")
 
 TaskModel::TaskModel(QObject *parent)
     : QStandardItemModel(parent)
@@ -16,7 +19,7 @@ QModelIndex TaskModel::indexFormUuid(const QUuid &uuid)
         if (item_uuid == uuid)
             return i;
     }
-    qWarning() << "Nie znaleziono indeksu";
+    qCWarning(modelTask) << "Nie znaleziono indeksu";
     return QModelIndex();
 }
 
@@ -28,7 +31,7 @@ QModelIndex TaskModel::indexFromId(int id)
         if (item_data.id == id)
             return i;
     }
-    qWarning() << "Nie znaleziono indeksu";
+    qCWarning(modelTask) << "Nie znaleziono indeksu";
     return QModelIndex();
 }
 
@@ -63,6 +66,19 @@ void TaskModel::updateTask(const Task &task, const QUuid& uuid)
     setData(index, QVariant::fromValue<Task>(task), RoleData);
     setData(index, QVariant::fromValue<TaskState>(TaskReady), RoleState);
     setData(index, QVariant::fromValue<QUuid>(QUuid()), RoleUuid);
+}
+
+void TaskModel::updateTask(const Task &task, TaskState state)
+{
+    auto index = indexFromId(task.id);
+    if (!index.isValid()) {
+        qCWarning(modelTask) << "Nie znaleziono zadania";
+        return;
+    }
+
+    setData(index, QVariant::fromValue<Task>(task), RoleData);
+    setData(index, QVariant::fromValue<QUuid>(QUuid()), RoleUuid);
+    setData(index, QVariant::fromValue<TaskState>(state), RoleState);
 }
 
 

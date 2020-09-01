@@ -15,6 +15,7 @@ public:
     void asyncTasks();
     void asyncAdd(Task task, QUuid uuid = QUuid());
     void asyncRemove(Task task);
+    void asyncEdit(Task task);
     void start();
     TaskModel* model();
 
@@ -24,6 +25,7 @@ public Q_SLOTS:
     void processSaveError(const QString& error, const QUuid& uuid);
     void processRemovedTask(const Task& task);
     void processRemoveError(const QString& error);
+    void processEdited(Task task);
 
 Q_SIGNALS:
 //    void saved(const Task& task, const QUuid& uuid);
@@ -35,6 +37,7 @@ Q_SIGNALS:
     void needAdd(Task task, QUuid uuid);
     void needReadAll();
     void needRemove(Task task);
+    void needEdit(Task task);
 
 private:
     Repository& m_repository;

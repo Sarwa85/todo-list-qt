@@ -27,7 +27,7 @@ void TaskDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
         brush = QBrush(QColor("#CB7373"));
         break;
     }
-    case TaskModel::TaskWaitingUpdate: {
+    case TaskModel::TaskWaitingEdit: {
         brush = QBrush(QColor("#73B6CB"));
         break;
     }

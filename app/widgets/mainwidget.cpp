@@ -8,6 +8,7 @@ MainWidget::MainWidget(Controler& controler, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MainWidget)
     , m_controler(controler)
+    , m_currentTask(Task())
 {
     ui->setupUi(this);
 
@@ -25,12 +26,7 @@ MainWidget::MainWidget(Controler& controler, QWidget *parent)
         ui->detailsBox->hide();
     });
 
-    connect(ui->listView, &QListView::clicked, this, [&](const QModelIndex& index){
-        if (!index.isValid())
-            return;
-        auto task = index.data(TaskModel::RoleData).value<Task>();
-        ui->pagePreviewWidget->setTask(task);
-    });
+    connect(ui->listView, &QListView::clicked, this, &MainWidget::updatePreviewTask);
 }
 
 MainWidget::~MainWidget()
@@ -70,6 +66,8 @@ void MainWidget::on_refreshButton_clicked()
 
 void MainWidget::on_addButton_clicked()
 {
+    m_currentTask = Task();
+    updateCurrentTaskUI();
     ui->stackedWidget->setCurrentWidget(ui->editPage);
 }
 
@@ -80,24 +78,22 @@ void MainWidget::on_backButton_clicked()
 
 void MainWidget::on_okButton_clicked()
 {
-    Task t;
-    t.title = ui->titleLineEdit->text();
-    t.text = ui->descTextEdit->toPlainText();
+    m_currentTask.title = ui->titleLineEdit->text();
+    m_currentTask.text = ui->descTextEdit->toPlainText();
     if (ui->alarmCheckBox->isChecked())
-        t.alertDateTime = QDateTime(ui->dateEdit->date(), ui->timeEdit->time());
+        m_currentTask.alertDateTime = QDateTime(ui->dateEdit->date(), ui->timeEdit->time());
     else
-        t.alertDateTime = QDateTime();
+        m_currentTask.alertDateTime = QDateTime();
     auto uuid = QUuid::createUuid();
+    if (m_currentTask.id >= 0) {
+        m_controler.asyncEdit(m_currentTask);
+    } else {
+        m_controler.asyncAdd(m_currentTask, uuid);
+    }
 
-
-    //    Q_EMIT needSave(t, uuid);
-    m_controler.asyncAdd(t, uuid);
     ui->stackedWidget->setCurrentWidget(ui->listPage);
-}
-
-void MainWidget::setActive(bool active)
-{
-    setEnabled(active);
+    updatePreviewTask();
+    updateUI(ui->listView->currentIndex());
 }
 
 void MainWidget::on_removeButton_clicked()
@@ -107,4 +103,29 @@ void MainWidget::on_removeButton_clicked()
         return;
     auto t = ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
     m_controler.asyncRemove(t);
+}
+
+void MainWidget::on_editButton_clicked()
+{
+    if (!ui->listView->currentIndex().isValid())
+        return;
+    m_currentTask = ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
+    updateCurrentTaskUI();
+    ui->stackedWidget->setCurrentWidget(ui->editPage);
+}
+
+void MainWidget::updateCurrentTaskUI()
+{
+    ui->titleLineEdit->setText(m_currentTask.title);
+    ui->descTextEdit->setPlainText(m_currentTask.text);
+    ui->dateEdit->setDate(m_currentTask.alertDateTime.date());
+    ui->timeEdit->setTime(m_currentTask.alertDateTime.time());
+}
+
+void MainWidget::updatePreviewTask()
+{
+    if (!ui->listView->currentIndex().isValid())
+        return;
+    auto task = ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
+    ui->pagePreviewWidget->setTask(task);
 }

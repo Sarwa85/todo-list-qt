@@ -2,6 +2,10 @@
 #include <QFile>
 #include <QThread>
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(repoFile)
+Q_LOGGING_CATEGORY(repoFile, "repository.file")
 
 FileRepository::FileRepository(const QString &name, QObject *parent)
     : Repository(name, parent)
@@ -66,20 +70,49 @@ void FileRepository::readAll()
 
 void FileRepository::remove(Task task)
 {
+    qCDebug(repoFile) << "Usuwam" << task.id << task.title;
     QThread::sleep(2);
     for (int a = m_model.count() - 1; a >= 0; --a) {
         if (m_model[a].id == task.id) {
             auto t = m_model.takeAt(a);
-            qWarning() << "Usuwam" << t.title;
             if (write(m_model)) {
+                // todo rollback
+                qCDebug(repoFile) << "Usunięto";
                 Q_EMIT removed(t);
             } else {
+                qCDebug(repoFile) << "Bład zapisu";
                 Q_EMIT removeError("Zapis nieudany");
             }
             return;
         }
     }
+    qCDebug(repoFile) << "Nie znaleziono zadania";
     Q_EMIT removeError("Nie znaloziono zadania");
+}
+
+void FileRepository::edit(Task task)
+{
+    qCDebug(repoFile) << "Edycja zadania" << task.id << task.title;
+    QThread::sleep(2);
+    auto index = taskIndex(task, m_model);
+    if (index < 0) {
+        auto error_text = tr("Nie znaleziono zadania");
+        qCDebug(repoFile) << error_text << task.id << task.title;
+        Q_EMIT editError(error_text, task.id);
+        return;
+    }
+
+    Task copyTask = m_model[index];
+    m_model[index] = task;
+    if (write(m_model)) {
+        qCDebug(repoFile) << "Edytowano" << task.id << task.title;
+        Q_EMIT edited(task);
+    } else {
+        m_model[index] = copyTask;
+        auto errorText = "Błąd zapisu";
+        qCDebug(repoFile) << errorText << task.id << task.title;
+        Q_EMIT editError(errorText, task.id);
+    }
 }
 
 bool FileRepository::isValid(Task task)
@@ -99,6 +132,16 @@ bool FileRepository::write(QList<Task> tasks)
     repo_file.close();
     return true;
 }
+
+int FileRepository::taskIndex(const Task &task, const QList<Task> &taskList)
+{
+    for (int a = 0; a < taskList.count(); ++a) {
+        if (taskList[a].id == task.id)
+            return a;
+    }
+    return -1;
+}
+
 
 QDataStream &operator<<(QDataStream &stream, const Task& task)
 {
