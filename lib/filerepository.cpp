@@ -148,7 +148,7 @@ QDataStream &operator<<(QDataStream &stream, const Task& task)
     stream << task.id
            << task.title
            << task.text
-           << task.alertDateTime
+           << task.dateTime
            << task.modDateTime;
     return stream;
 }
@@ -158,7 +158,7 @@ QDataStream &operator>>(QDataStream &stream, Task &task)
     stream >> task.id
             >> task.title
             >> task.text
-            >> task.alertDateTime
+            >> task.dateTime
             >> task.modDateTime;
     return stream;
 }

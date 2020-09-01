@@ -8,7 +8,7 @@ MainWidget::MainWidget(Controler& controler, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MainWidget)
     , m_controler(controler)
-    , m_currentTask(Task())
+    , m_activeTask(Task())
 {
     ui->setupUi(this);
 
@@ -66,8 +66,8 @@ void MainWidget::on_refreshButton_clicked()
 
 void MainWidget::on_addButton_clicked()
 {
-    m_currentTask = Task();
-    updateCurrentTaskUI();
+    m_activeTask = Task();
+    updateActiveTaskUI();
     ui->stackedWidget->setCurrentWidget(ui->editPage);
 }
 
@@ -78,17 +78,12 @@ void MainWidget::on_backButton_clicked()
 
 void MainWidget::on_okButton_clicked()
 {
-    m_currentTask.title = ui->titleLineEdit->text();
-    m_currentTask.text = ui->descTextEdit->toPlainText();
-    if (ui->alarmCheckBox->isChecked())
-        m_currentTask.alertDateTime = QDateTime(ui->dateEdit->date(), ui->timeEdit->time());
-    else
-        m_currentTask.alertDateTime = QDateTime();
+    readActiveTask();
     auto uuid = QUuid::createUuid();
-    if (m_currentTask.id >= 0) {
-        m_controler.asyncEdit(m_currentTask);
+    if (m_activeTask.id >= 0) {
+        m_controler.asyncEdit(m_activeTask);
     } else {
-        m_controler.asyncAdd(m_currentTask, uuid);
+        m_controler.asyncAdd(m_activeTask, uuid);
     }
 
     ui->stackedWidget->setCurrentWidget(ui->listPage);
@@ -98,34 +93,42 @@ void MainWidget::on_okButton_clicked()
 
 void MainWidget::on_removeButton_clicked()
 {
-    /// @todo obsłużyć listę zadań do usunięcia
-    if (!ui->listView->currentIndex().isValid())
-        return;
-    auto t = ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
-    m_controler.asyncRemove(t);
+    m_controler.asyncRemove(currentTask());
 }
 
 void MainWidget::on_editButton_clicked()
 {
-    if (!ui->listView->currentIndex().isValid())
-        return;
-    m_currentTask = ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
-    updateCurrentTaskUI();
+    m_activeTask = currentTask();
+    updateActiveTaskUI();
     ui->stackedWidget->setCurrentWidget(ui->editPage);
 }
 
-void MainWidget::updateCurrentTaskUI()
+void MainWidget::updateActiveTaskUI()
 {
-    ui->titleLineEdit->setText(m_currentTask.title);
-    ui->descTextEdit->setPlainText(m_currentTask.text);
-    ui->dateEdit->setDate(m_currentTask.alertDateTime.date());
-    ui->timeEdit->setTime(m_currentTask.alertDateTime.time());
+    ui->titleLineEdit->setText(m_activeTask.title);
+    ui->descTextEdit->setPlainText(m_activeTask.text);
+    ui->dateEdit->setDate(m_activeTask.dateTime.date());
+    ui->timeEdit->setTime(m_activeTask.dateTime.time());
 }
 
 void MainWidget::updatePreviewTask()
 {
+    ui->pagePreviewWidget->setTask(currentTask());
+}
+
+Task MainWidget::currentTask() const
+{
     if (!ui->listView->currentIndex().isValid())
-        return;
-    auto task = ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
-    ui->pagePreviewWidget->setTask(task);
+        return Task();
+    return ui->listView->currentIndex().data(TaskModel::RoleData).value<Task>();
+}
+
+void MainWidget::readActiveTask()
+{
+    m_activeTask.title = ui->titleLineEdit->text();
+    m_activeTask.text = ui->descTextEdit->toPlainText();
+    if (ui->alarmCheckBox->isChecked())
+        m_activeTask.dateTime = QDateTime(ui->dateEdit->date(), ui->timeEdit->time());
+    else
+        m_activeTask.dateTime = QDateTime();
 }

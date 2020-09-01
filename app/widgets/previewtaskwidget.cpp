@@ -16,9 +16,12 @@ PreviewTaskWidget::~PreviewTaskWidget()
 
 void PreviewTaskWidget::setTask(const Task& task)
 {
+    if (task.id < 0)
+        return;
+
     ui->titleLabel->setText(task.title);
     ui->descLabel->setText(task.text);
-    ui->alarmLabel->setText(task.alertDateTime.toString("yyyy-MM-dd hh:mm:ss"));
+    ui->alarmLabel->setText(task.dateTime.toString("yyyy-MM-dd hh:mm:ss"));
     ui->idLabel->setText(QString::number(task.id));
 }
 

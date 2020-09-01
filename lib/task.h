@@ -9,7 +9,7 @@ public:
     explicit Task();
     explicit Task(const QString& title, const QString& text, const QDateTime& dateTime);
     int id;
-    QDateTime alertDateTime;
+    QDateTime dateTime;
     QString title;
     QString text;
     QDateTime modDateTime;

@@ -38,10 +38,12 @@ private:
     Ui::MainWidget *ui;
     QQueue<QUuid> m_queue;
     Controler& m_controler;
-    Task m_currentTask;
+    Task m_activeTask;
 
-    void updateCurrentTaskUI();
+    void updateActiveTaskUI();
     void updatePreviewTask();
+    Task currentTask() const;
+    void readActiveTask();
 };
 
 
