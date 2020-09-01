@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDateTime>
+#include <QMetaType>
 
 class Task
 {
@@ -14,3 +15,4 @@ public:
     QDateTime modDateTime;
 };
 
+Q_DECLARE_METATYPE(Task);

@@ -1,5 +1,7 @@
 #include "filerepository.h"
 #include <QFile>
+#include <QThread>
+#include <QDebug>
 
 FileRepository::FileRepository(const QString &name, QObject *parent)
     : Repository(name, parent)
@@ -7,36 +9,43 @@ FileRepository::FileRepository(const QString &name, QObject *parent)
 
 }
 
-bool FileRepository::save(Task task)
+void FileRepository::add(Task task, QUuid uuid)
 {
-    if (!isValid(task))
-        return false;
-
-    auto tasks = readAll();
+    QThread::sleep(2);
+    if (!isValid(task)) {
+        Q_EMIT saveError("Niepoprawne zadanie", uuid);
+        return;
+    }
+    Task outTask = task;
     if (task.id >= 0) {
         // find and delete old task
-        for (int a = 0 ; a < tasks.count() ; ++a) {
-            if (tasks[a].id == task.id) {
-                tasks.removeAt(a);
+        for (int a = 0 ; a < m_model.count() ; ++a) {
+            if (m_model[a].id == task.id) {
+                m_model.removeAt(a);
                 break;
             }
         }
     } else {
         // gen id
-        if (tasks.isEmpty())
-            task.id = 0;
+        if (m_model.isEmpty())
+            outTask.id = 0;
         else
-            task.id = tasks.last().id + 1;
+            outTask.id = m_model.last().id + 1;
     }
-    tasks << task;
-    return write(tasks);
+    m_model << outTask;
+    if (write(m_model)) {
+        Q_EMIT saved(outTask, uuid);
+    } else {
+        Q_EMIT saveError("Zapis nieudany", uuid);
+    }
 }
 
-QList<Task> FileRepository::readAll()
+QList<Task> FileRepository::readFromFile()
 {
     QFile repo_file(m_name);
-    if (!repo_file.open(QFile::ReadOnly))
+    if (!repo_file.open(QFile::ReadOnly)) {
         return QList<Task>();
+    }
     QDataStream stream(&repo_file);
     QList<Task> task_list;
     while (!stream.atEnd()) {
@@ -48,13 +57,38 @@ QList<Task> FileRepository::readAll()
     return task_list;
 }
 
-bool FileRepository::isValid(const Task &task)
+void FileRepository::readAll()
+{
+    QThread::sleep(2);
+    m_model = readFromFile();
+    Q_EMIT tasks(m_model);
+}
+
+void FileRepository::remove(Task task)
+{
+    QThread::sleep(2);
+    for (int a = m_model.count() - 1; a >= 0; --a) {
+        if (m_model[a].id == task.id) {
+            auto t = m_model.takeAt(a);
+            qWarning() << "Usuwam" << t.title;
+            if (write(m_model)) {
+                Q_EMIT removed(t);
+            } else {
+                Q_EMIT removeError("Zapis nieudany");
+            }
+            return;
+        }
+    }
+    Q_EMIT removeError("Nie znaloziono zadania");
+}
+
+bool FileRepository::isValid(Task task)
 {
     return !task.title.isEmpty()
             && !task.text.isEmpty();
 }
 
-bool FileRepository::write(const QList<Task> &tasks)
+bool FileRepository::write(QList<Task> tasks)
 {
     QFile repo_file(m_name);
     if (!repo_file.open(QFile::WriteOnly))

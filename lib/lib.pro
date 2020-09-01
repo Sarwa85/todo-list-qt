@@ -1,4 +1,4 @@
-QT -= gui
+#QT -= gui
 
 TEMPLATE = lib
 DEFINES += LIB_LIBRARY
@@ -21,14 +21,16 @@ SOURCES += \
     controler.cpp \
     filerepository.cpp \
     repository.cpp \
-    task.cpp
+    task.cpp \
+    taskmodel.cpp
 
 HEADERS += \
     controler.h \
     filerepository.h \
     lib_global.h \
     repository.h \
-    task.h
+    task.h \
+    taskmodel.h
 
 TRANSLATIONS += \
     lib_pl_PL.ts

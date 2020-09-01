@@ -10,14 +10,15 @@ class FileRepository : public Repository
 public:
     FileRepository(const QString& name, QObject* parent = 0);
 
-    // Repository interface
-public:
-    bool save(Task task);
-    QList<Task> readAll();
+    void add(Task task, QUuid uuid = QUuid());
+    void readAll();
+    void remove(Task task);
 
 private:
-    bool isValid(const Task& task);
-    bool write(const QList<Task>& tasks);
+    QList<Task> readFromFile();
+    bool isValid(Task task);
+    bool write(QList<Task> tasks);
+    QList<Task> m_model;
 };
 
 QDataStream &operator<<(QDataStream &stream, const Task &);

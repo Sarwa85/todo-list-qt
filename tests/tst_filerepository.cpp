@@ -10,8 +10,9 @@ class FileRepositoryTest : public QObject
 public:
     FileRepositoryTest()
     {
-
+        qRegisterMetaType<Task>("Task");
     }
+
     ~FileRepositoryTest()
     {
 
@@ -47,12 +48,29 @@ private slots:
         QFETCH(bool, valid);
 
         Task t(title, text, QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss"));
-        QCOMPARE(m_repo->save(t), valid);
-        if (valid)
+        QSignalSpy saveSpy(m_repo, SIGNAL(saved(const Task&, const QUuid&)));
+        QSignalSpy errorSpy(m_repo, SIGNAL(saveError(const QString&)));
+        QUuid uuid = QUuid::createUuid();
+        m_repo->add(t, uuid);
+        if (valid) {
+            QCOMPARE(saveSpy.count(), 1);
+            QCOMPARE(errorSpy.count(), 0);
+            QList<QVariant> args = saveSpy.takeFirst();
+            auto savedTask = args.at(0).value<Task>();
+            auto savedUuid = args.at(1).value<QUuid>();
+            QVERIFY(savedTask.id >= 0);
             ++m_task_counter;
+            QCOMPARE(uuid, savedUuid);
+        } else {
+            QCOMPARE(saveSpy.count(), 0);
+            QCOMPARE(errorSpy.count(), 1);
+        }
 
-        auto tasks = m_repo->readAll();
-        QCOMPARE(tasks.count(), m_task_counter);
+
+
+
+//        auto tasks = m_repo->readAll();
+//        QCOMPARE(tasks.count(), m_task_counter);
     }
 
     void cleanupTestCase()

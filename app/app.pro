@@ -17,7 +17,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    widgets/mainwidget.cpp
+    widgets/mainwidget.cpp \
+    widgets/mainwindow.cpp \
+    widgets/previewtaskwidget.cpp \
+    widgets/taskdelegate.cpp
 
 TRANSLATIONS += \
     app_pl_PL.ts
@@ -28,10 +31,15 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 FORMS += \
-    widgets/mainwidget.ui
+    widgets/mainwidget.ui \
+    widgets/mainwindow.ui \
+    widgets/previewtaskwidget.ui
 
 HEADERS += \
-    widgets/mainwidget.h
+    widgets/mainwidget.h \
+    widgets/mainwindow.h \
+    widgets/previewtaskwidget.h \
+    widgets/taskdelegate.h
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/release/ -ltodolist
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/debug/ -ltodolist
